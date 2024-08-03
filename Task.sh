@@ -37,13 +37,13 @@ require("@nomicfoundation/hardhat-toolbox");
 require("dotenv").config();
 
 module.exports = {
-  solidity: "0.8.20",
-  networks: {
-    swisstronik: {
-      url: "https://json-rpc.testnet.swisstronik.com/",
-      accounts: [\`0x\${process.env.PRIVATE_KEY}\`],
-    },
-  },
+  solidity: "0.8.20",
+  networks: {
+    swisstronik: {
+      url: "https://json-rpc.testnet.swisstronik.com/",
+      accounts: [\`0x\${process.env.PRIVATE_KEY}\`],
+    },
+  },
 };
 EOL
 echo "Hardhat configuration completed."
@@ -62,13 +62,13 @@ import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
 
 contract TestNFT is ERC721, ERC721Burnable {
-    constructor()
-        ERC721("$NFT_NAME","$NFT_SYMBOL")
-    {}
+    constructor()
+        ERC721("$NFT_NAME","$NFT_SYMBOL")
+    {}
 
-    function safeMint(address to, uint256 tokenId) public {
-        _safeMint(to, tokenId);
-    }
+    function safeMint(address to, uint256 tokenId) public {
+        _safeMint(to, tokenId);
+    }
 }
 EOL
 echo "NFT.sol contract created."
@@ -84,16 +84,16 @@ const hre = require("hardhat");
 const fs = require("fs");
 
 async function main() {
-  const contract = await hre.ethers.deployContract("TestNFT");
-  await contract.waitForDeployment();
-  const deployedContract = await contract.getAddress();
-  fs.writeFileSync("contract.txt", deployedContract);
-  console.log(\`Contract deployed to \${deployedContract}\`);
+  const contract = await hre.ethers.deployContract("TestNFT");
+  await contract.waitForDeployment();
+  const deployedContract = await contract.getAddress();
+  fs.writeFileSync("contract.txt", deployedContract);
+  console.log(\`Contract deployed to \${deployedContract}\`);
 }
 
 main().catch((error) => {
-  console.error(error);
-  process.exitCode = 1;
+  console.error(error);
+  process.exitCode = 1;
 });
 EOL
 echo "deploy.js script created."
@@ -109,35 +109,35 @@ const fs = require("fs");
 const { encryptDataField, decryptNodeResponse } = require("@swisstronik/utils");
 
 const sendShieldedTransaction = async (signer, destination, data, value) => {
-  const rpcLink = hre.network.config.url;
-  const [encryptedData] = await encryptDataField(rpcLink, data);
-  return await signer.sendTransaction({
-    from: signer.address,
-    to: destination,
-    data: encryptedData,
-    value,
-  });
+  const rpcLink = hre.network.config.url;
+  const [encryptedData] = await encryptDataField(rpcLink, data);
+  return await signer.sendTransaction({
+    from: signer.address,
+    to: destination,
+    data: encryptedData,
+    value,
+  });
 };
 
 async function main() {
-  const contractAddress = fs.readFileSync("contract.txt", "utf8").trim();
-  const [signer] = await hre.ethers.getSigners();
-  const contractFactory = await hre.ethers.getContractFactory("TestNFT");
-  const contract = contractFactory.attach(contractAddress);
-  const functionName = "safeMint";
-  const safeMintTx = await sendShieldedTransaction(
-    signer,
-    contractAddress,
-    contract.interface.encodeFunctionData(functionName, [signer.address, 1]),
-    0
-  );
-  await safeMintTx.wait();
-  console.log("Transaction Receipt: ", \`Minting NFT has been success! Transaction hash: https://explorer-evm.testnet.swisstronik.com/tx/\${safeMintTx.hash}\`);
+  const contractAddress = fs.readFileSync("contract.txt", "utf8").trim();
+  const [signer] = await hre.ethers.getSigners();
+  const contractFactory = await hre.ethers.getContractFactory("TestNFT");
+  const contract = contractFactory.attach(contractAddress);
+  const functionName = "safeMint";
+  const safeMintTx = await sendShieldedTransaction(
+    signer,
+    contractAddress,
+    contract.interface.encodeFunctionData(functionName, [signer.address, 1]),
+    0
+  );
+  await safeMintTx.wait();
+  console.log("Transaction Receipt: ", \`Minting NFT has been success! Transaction hash: https://explorer-evm.testnet.swisstronik.com/tx/\${safeMintTx.hash}\`);
 }
 
 main().catch((error) => {
-  console.error(error);
-  process.exitCode = 1;
+  console.error(error);
+  process.exitCode = 1;
 });
 EOL
 echo "mint.js script created."
